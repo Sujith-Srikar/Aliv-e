@@ -1,6 +1,6 @@
-# Uptime Monitor
+# Aliv-e
 
-A simple tool that checks whether your websites and APIs are up or down. You add a monitor with a URL and a schedule. The system fetches that URL on time, records the result, and shows you the latest status.
+A simple uptime monitoring tool that checks whether your websites and APIs are up or down. You add a monitor with a URL and a schedule. The system fetches that URL on time, records the result, and shows you the latest status.
 
 Built with **Astro** (front-end + API) and **Supabase** (Postgres, Edge Functions, pg_cron, pgmq). It runs on the free tier and has no extra services to pay for.
 
@@ -13,7 +13,7 @@ Built with **Astro** (front-end + API) and **Supabase** (Postgres, Edge Function
 
 - Track many URLs from one dashboard.
 - Choose how often each one is checked (every 10 to 60 minutes).
-- See live **UP / DOWN** status, response time, and the last error.
+- See live **UP / DOWN / PENDING** status, response time, and the last error.
 - Pause and resume any monitor without deleting it.
 - Checks are scheduled automatically — you do nothing after you create a monitor.
 
@@ -107,8 +107,9 @@ Because the scheduler and the worker are separate, one slow check never blocks t
 │   ├── components/      # UI pieces (monitor cards, forms, badges)
 │   ├── layouts/         # Page layout wrapper
 │   ├── lib/             # Request + error helpers for the API
-│   ├── pages/           # Routes (dashboard + /api/monitors endpoints)
+│   ├── pages/           # Routes (landing, dashboard + /api/monitors endpoints)
 │   └── styles/          # Global CSS
+├── public/              # Static files (favicons, web manifest, local Array/Khand fonts)
 ├── shared/              # Code used by both the app and the API
 │   ├── schemas.ts       # Zod validation for create/update inputs
 │   ├── env.ts           # Validates required environment variables
@@ -166,7 +167,7 @@ These are planned or considered but not built yet.
 - **Alerting.** Send email, webhook, or Slack notifications when a monitor goes DOWN.
 - **Multi-region checks.** Check a URL from more than one place for better accuracy.
 
-Explicitly out of scope for now: an external queue, a horizontally scaled worker fleet, and multi-region checking.
+Explicitly out of scope for now: an external queue and a horizontally scaled worker fleet.
 
 ---
 
@@ -285,6 +286,7 @@ The CRUD endpoints live under `/api/monitors`.
 Check intervals: `10, 14, 15, 20, 30, 45, 60` minutes.
 Timeouts: `1, 5, 10, 15, 20, 30, 45, 60` seconds.
 URLs must be `http` or `https` and must resolve to public IPs only.
+Usernames run 3–10 chars: lowercase letters, numbers, `_` or `-`.
 
 ---
 
