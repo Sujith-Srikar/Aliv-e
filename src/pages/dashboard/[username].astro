@@ -9,40 +9,41 @@ import Layout from '../../layouts/Layout.astro';
 export const prerender = false;
 
 const username = (Astro.params.username ?? '').trim().toLowerCase();
-const valid = /^[a-z0-9_-]{3,30}$/.test(username);
+const valid = /^[a-z0-9_-]{3,10}$/.test(username);
 const monitors: Monitor[] = valid ? await listMonitorsForUser(username) : [];
 ---
 
 <Layout title={`${username || 'Dashboard'} — Uptime Monitor`}>
-	<main class="container">
-		<header class="page-head">
-			<a class="back-link" href="/">← change user</a>
-			<h1 class="username">@{username}</h1>
-		</header>
+	<main class="container dashboard">
+		<div class="dashboard-top">
+			<header class="page-head">
+				<a class="back-link" href="/">← change user</a>
+				<h1 class="username">@{username}</h1>
+			</header>
 
-		{!valid ? (
-			<p class="muted">
-				That doesn't look like a valid username. <a href="/">Go back</a> and re-enter it.
-			</p>
-		) : (
-			<>
+			{valid && (
 				<div class="toolbar">
 					<p class="muted mono-comment">{monitors.length} monitor{monitors.length === 1 ? '' : 's'} · active</p>
 					<button class="btn btn-primary" type="button" data-action="create">+ add monitor</button>
 				</div>
+			)}
+		</div>
 
-				{monitors.length === 0 ? (
-					<EmptyState>
-						<button class="btn btn-primary" type="button" data-action="create">+ add your first monitor</button>
-					</EmptyState>
-				) : (
-					<ul class="monitor-list">
-						{monitors.map((monitor, index) => (
-							<MonitorCard monitor={monitor} delay={index * 45} />
-						))}
-					</ul>
-				)}
-			</>
+		{!valid ? (
+			<p class="muted">
+				That username can't be used — 3–10 chars of letters, numbers, <code>_</code> or <code>-</code>.{' '}
+				<a href="/">Go back</a> and try another.
+			</p>
+		) : monitors.length === 0 ? (
+			<EmptyState>
+				<button class="btn btn-primary" type="button" data-action="create">+ add your first monitor</button>
+			</EmptyState>
+		) : (
+			<ul class="monitor-list" tabindex="0" aria-label="Monitors" data-lenis-prevent>
+				{monitors.map((monitor, index) => (
+					<MonitorCard monitor={monitor} delay={index * 45} />
+				))}
+			</ul>
 		)}
 
 		<MonitorForm username={username} />
@@ -61,6 +62,29 @@ const monitors: Monitor[] = valid ? await listMonitorsForUser(username) : [];
 	const intervalEl = document.querySelector<HTMLSelectElement>('#monitor-interval');
 	const timeoutEl = document.querySelector<HTMLSelectElement>('#monitor-timeout');
 	const submitBtn = document.querySelector<HTMLButtonElement>('#monitor-submit');
+	const dashboardTop = document.querySelector<HTMLDivElement>('.dashboard-top');
+	const monitorList = document.querySelector<HTMLUListElement>('.monitor-list');
+
+	// Cards scroll in their own full-width scroller (scrollbar outside at the
+	// viewport edge), so forward wheel/touch over the fixed top to the list.
+	if (dashboardTop && monitorList) {
+		dashboardTop.addEventListener('wheel', (event: WheelEvent) => {
+			event.preventDefault();
+			monitorList.scrollTop += event.deltaY;
+		}, { passive: false });
+
+		let touchY: number | null = null;
+		dashboardTop.addEventListener('touchstart', (event: TouchEvent) => {
+			touchY = event.touches[0]?.clientY ?? null;
+		}, { passive: true });
+		dashboardTop.addEventListener('touchmove', (event: TouchEvent) => {
+			const y = event.touches[0]?.clientY;
+			if (touchY == null || y == null) return;
+			event.preventDefault();
+			monitorList.scrollTop += touchY - y;
+			touchY = y;
+		}, { passive: false });
+	}
 
 	declare global {
 		interface Window {
@@ -132,10 +156,35 @@ const monitors: Monitor[] = valid ? await listMonitorsForUser(username) : [];
 		event.preventDefault();
 		clearError();
 
+		const name = (nameEl?.value ?? '').trim();
+		const rawUrl = (urlEl?.value ?? '').trim();
+		if (!name) {
+			showError('give your monitor a name.');
+			return;
+		}
+		if (name.length > 80) {
+			showError('keep the name under 80 chars.');
+			return;
+		}
+		if (!rawUrl) {
+			showError('paste the URL you want watched.');
+			return;
+		}
+		let scheme = '';
+		try {
+			scheme = new URL(rawUrl).protocol;
+		} catch {
+			scheme = '';
+		}
+		if (scheme !== 'http:' && scheme !== 'https:') {
+			showError('that URL doesn’t look right — include https://');
+			return;
+		}
+
 		const id = idEl?.value ?? '';
 		const payload: Record<string, string | number> = {
-			name: nameEl?.value ?? '',
-			url: urlEl?.value ?? '',
+			name,
+			url: rawUrl,
 			intervalMinutes: Number(intervalEl?.value ?? 10),
 			timeoutSeconds: Number(timeoutEl?.value ?? 10),
 		};
