@@ -8,8 +8,8 @@ interface Props {
 const { username } = Astro.props;
 ---
 
-<dialog id="monitor-dialog" aria-labelledby="monitor-dialog-title">
-	<form id="monitor-form" class="dialog-body">
+<dialog id="monitor-dialog" aria-labelledby="monitor-dialog-title" data-lenis-prevent>
+	<form id="monitor-form" class="dialog-body" novalidate>
 		<h2 id="monitor-dialog-title">Monitor</h2>
 
 		<input type="hidden" id="monitor-id" name="monitorId" value="" />
@@ -43,7 +43,7 @@ const { username } = Astro.props;
 			</select>
 		</div>
 
-		<p id="monitor-form-error" class="form-error" hidden></p>
+		<p id="monitor-form-error" class="form-error" role="alert" hidden></p>
 
 		<div class="form-actions">
 			<button class="btn" type="button" data-action="cancel-dialog">Cancel</button>

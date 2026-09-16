@@ -3,13 +3,13 @@ import { z } from 'zod';
 export const ALLOWED_INTERVALS = [10, 14, 15, 20, 30, 45, 60] as const;
 export const ALLOWED_TIMEOUTS = [1, 5, 10, 15, 20, 30, 45, 60] as const;
 
-const USERNAME_RE = /^[a-z0-9_-]{3,30}$/;
+const USERNAME_RE = /^[a-z0-9_-]{3,10}$/;
 
 const username = z
   .string()
   .trim()
   .toLowerCase()
-  .regex(USERNAME_RE, 'username must be 3-30 chars (a-z, 0-9, _ or -)');
+  .regex(USERNAME_RE, 'username must be 3-10 chars (a-z, 0-9, _ or -)');
 
 const name = z.string().trim().min(1, 'name must be 1-80 chars').max(80, 'name must be 1-80 chars');
 
