@@ -6,11 +6,11 @@ import Layout from '../layouts/Layout.astro';
 	<main class="container">
 		<!-- HERO -->
 		<header class="hero">
-			<span class="brand"><span class="brand-dot"></span>uptime_monitor<span class="cursor"></span></span>
+			<span class="brand"><span class="brand-dot"></span>aliv-e://<span class="cursor"></span></span>
 			<h1>know before<br />your users do.</h1>
 			<p class="muted hero-sub">a silent sentinel for your endpoints.<br />no signup. no password. just a username.</p>
 
-			<form id="lookup-form" class="lookup">
+			<form id="lookup-form" class="lookup" novalidate>
 				<label class="sr-only" for="username-input">Username</label>
 				<input
 					id="username-input"
@@ -18,16 +18,15 @@ import Layout from '../layouts/Layout.astro';
 					name="username"
 					placeholder="your username"
 					autocomplete="username"
-					minlength="3"
-					maxlength="30"
-					pattern="^[A-Za-z0-9_-]{3,30}$"
+					aria-describedby="lookup-error"
 					required
 					autofocus
 				/>
 				<button class="btn btn-primary" type="submit">enter →</button>
 			</form>
+			<p id="lookup-error" class="form-error lookup-error" role="alert" hidden></p>
 			<p class="muted mono-comment hero-note">
-				3–30 chars · letters, numbers, <code>_</code> or <code>-</code>
+				3–10 chars · letters, numbers, <code>_</code> or <code>-</code>
 			</p>
 		</header>
 
@@ -96,10 +95,22 @@ import Layout from '../layouts/Layout.astro';
 <script>
 	const handleLookup: (form: HTMLFormElement) => void = (form) => {
 		const input = form.querySelector<HTMLInputElement>('input[name="username"]');
+		const error = document.querySelector<HTMLParagraphElement>('#lookup-error');
+		const showLookupError = (message: string): void => {
+			if (!error) return;
+			error.textContent = message;
+			error.hidden = false;
+		};
+		input?.addEventListener('input', () => {
+			if (!error) return;
+			error.textContent = '';
+			error.hidden = true;
+		});
 		form.addEventListener('submit', (event) => {
 			event.preventDefault();
 			const username = (input?.value ?? '').trim().toLowerCase();
-			if (!username) {
+			if (!/^[a-z0-9_-]{3,10}$/.test(username)) {
+				showLookupError('usernames run 3–10 chars: letters, numbers, _ or -.');
 				return;
 			}
 			location.href = `/dashboard/${encodeURIComponent(username)}`;
