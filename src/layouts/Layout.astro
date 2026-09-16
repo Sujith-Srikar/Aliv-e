@@ -13,24 +13,28 @@ const { title } = Astro.props;
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="theme-color" content="#1e1e1e" />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap"
-			rel="stylesheet"
-		/>
+		<meta name="theme-color" content="#000000" />
+		<link rel="preload" href="/fonts/Array-Regular.woff2" as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href="/fonts/Array-Semibold.woff2" as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href="/fonts/Khand-Regular.woff2" as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href="/fonts/Khand-Medium.woff2" as="font" type="font/woff2" crossorigin />
 		<title>{title}</title>
 	</head>
 	<body>
+		<div class="frame-gutter frame-gutter-top" aria-hidden="true"></div>
+		<div class="frame-gutter frame-gutter-bottom" aria-hidden="true"></div>
+		<div class="frame-gutter frame-gutter-left" aria-hidden="true"></div>
+		<div class="frame-gutter frame-gutter-right" aria-hidden="true"></div>
 		<div class="frame" aria-hidden="true">
+			<span class="frame-line frame-line-top"></span>
+			<span class="frame-line frame-line-bottom"></span>
+			<span class="frame-line frame-line-left"></span>
+			<span class="frame-line frame-line-right"></span>
 			<span class="frame-tick tl">+</span>
 			<span class="frame-tick tr">+</span>
 			<span class="frame-tick bl">+</span>
 			<span class="frame-tick br">+</span>
 		</div>
-		<div class="rail rail-left" aria-hidden="true"></div>
-		<div class="rail rail-right" aria-hidden="true"></div>
 		<slot />
 		<div id="toast-root" class="toast-root" aria-live="polite"></div>
 	</body>
