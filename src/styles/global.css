@@ -1,8 +1,48 @@
+@font-face {
+  font-family: "Array";
+  src:
+    url("/fonts/Array-Regular.woff2") format("woff2"),
+    url("/fonts/Array-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Array";
+  src:
+    url("/fonts/Array-Semibold.woff2") format("woff2"),
+    url("/fonts/Array-Semibold.woff") format("woff");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Khand";
+  src:
+    url("/fonts/Khand-Regular.woff2") format("woff2"),
+    url("/fonts/Khand-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Khand";
+  src:
+    url("/fonts/Khand-Medium.woff2") format("woff2"),
+    url("/fonts/Khand-Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --bg: #1e1e1e;
-  --bg-subtle: #202020;
-  --surface: #272727;
-  --surface-hover: #2f2f2f;
+  --bg: #000000;
+  --bg-subtle: #000000;
+  --surface: #181818;
+  --surface-hover: #1D1D1D;
   --border: #3a3a3a;
   --border-hover: #4a4a4a;
   --text: #f5f5f5;
@@ -18,10 +58,11 @@
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
   --shadow-lg: 0 24px 64px rgb(0 0 0 / 0.55), 0 4px 16px rgb(0 0 0 / 0.35);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono:
-    "Spline Sans Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  --frame-inset: 14px;
+  --font-display: "Array", "Inter", system-ui, -apple-system, sans-serif;
+  --font-utility: "Khand", "Inter", system-ui, -apple-system, sans-serif;
+  --frame-inset: 22px;
+  --frame-side-shrink: 0;
+  --frame-side-inset: 100px;
   --content-width: 680px;
 }
 
@@ -36,13 +77,13 @@ html {
 
 body {
   margin: 0;
-  font-family: var(--font-sans);
+  font-family: var(--font-utility);
   font-size: 16px;
   line-height: 1.5;
   letter-spacing: -0.01em;
   color: var(--text);
   background: var(--bg);
-  background-image: radial-gradient(circle at 50% 0%, rgb(255 255 255 / 0.05), transparent 55%);
+  background-image: none;
   background-repeat: no-repeat;
   min-height: 100vh;
 }
@@ -74,6 +115,11 @@ ul {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+code,
+kbd {
+  font-family: var(--font-utility);
 }
 
 ::selection {
@@ -115,9 +161,84 @@ ul {
 .frame {
   position: fixed;
   inset: var(--frame-inset);
-  border: 1px solid var(--border);
   pointer-events: none;
-  z-index: 1;
+  z-index: 3;
+}
+
+.frame-line {
+  position: absolute;
+  background: var(--border);
+}
+
+.frame-line-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.frame-line-bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.frame-line-left {
+  left: var(--frame-side-inset);
+  top: var(--frame-side-shrink);
+  bottom: var(--frame-side-shrink);
+  width: 1px;
+}
+
+.frame-line-right {
+  right: var(--frame-side-inset);
+  top: var(--frame-side-shrink);
+  bottom: var(--frame-side-shrink);
+  width: 1px;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --frame-side-inset: 0px;
+  }
+}
+
+.frame-gutter {
+  position: fixed;
+  z-index: 2;
+  pointer-events: none;
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+}
+
+.frame-gutter-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--frame-inset);
+}
+
+.frame-gutter-bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--frame-inset);
+}
+
+.frame-gutter-left {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--frame-inset);
+}
+
+.frame-gutter-right {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: var(--frame-inset);
 }
 
 .frame-tick {
@@ -148,52 +269,11 @@ ul {
   right: -6px;
 }
 
-.rail {
-  position: fixed;
-  top: var(--frame-inset);
-  bottom: var(--frame-inset);
-  width: calc((100vw - var(--content-width)) / 2 - var(--frame-inset));
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      var(--border) 0,
-      var(--border) 1px,
-      transparent 1px,
-      transparent 48px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      var(--border) 0,
-      var(--border) 1px,
-      transparent 1px,
-      transparent 48px
-    );
-  opacity: 0.25;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.rail-left {
-  left: var(--frame-inset);
-  border-right: 1px solid var(--border);
-}
-
-.rail-right {
-  right: var(--frame-inset);
-  border-left: 1px solid var(--border);
-}
-
-@media (max-width: 860px) {
-  .rail {
-    display: none;
-  }
-}
-
 .brand {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-utility);
   font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -220,7 +300,7 @@ ul {
 }
 
 .mono-comment {
-  font-family: var(--font-mono);
+  font-family: var(--font-utility);
   font-size: 0.8rem;
   letter-spacing: 0.02em;
 }
@@ -241,7 +321,7 @@ ul {
 }
 
 .hero h1 {
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   font-size: clamp(1.9rem, 5vw, 2.7rem);
   letter-spacing: -0.03em;
   font-weight: 600;
@@ -290,7 +370,7 @@ select {
 
 label {
   display: block;
-  font-family: var(--font-mono);
+  font-family: var(--font-utility);
   font-size: 0.82rem;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -347,7 +427,7 @@ label {
 }
 
 .section-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-utility);
   font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 0.03em;
@@ -392,7 +472,7 @@ label {
 }
 
 .feature-name {
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -469,7 +549,7 @@ label {
 }
 
 .back-link {
-  font-family: var(--font-mono);
+  font-family: var(--font-utility);
   font-size: 0.85rem;
   letter-spacing: 0.02em;
   color: var(--text-tertiary);
@@ -483,7 +563,7 @@ label {
 }
 
 .page-head h1 {
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   font-size: 1.55rem;
   letter-spacing: -0.03em;
   line-height: 1.1;
@@ -507,6 +587,63 @@ label {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+/* Dashboard: top stays fixed, only the cards scroll. The list scroller
+   is full-width so its scrollbar sits at the viewport edge (outside the
+   cards); wheel/touch over the fixed top is forwarded to the list. */
+.container.dashboard {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  padding-block: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dashboard-top {
+  flex-shrink: 0;
+  background: #000000;
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+}
+
+.dashboard-top .page-head,
+.dashboard-top .toolbar,
+.dashboard > p,
+.dashboard .empty-state {
+  width: min(var(--content-width), 100% - 2rem);
+  margin-inline: auto;
+}
+
+.dashboard .toolbar {
+  margin-bottom: 0;
+}
+
+.dashboard .monitor-list {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  padding-bottom: 4rem;
+}
+
+.dashboard .monitor-list .card {
+  width: min(var(--content-width), 100% - 2rem);
+  margin-inline: auto;
+  flex-shrink: 0;
+}
+
+.dashboard .monitor-list:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: -2px;
 }
 
 .card {
@@ -542,7 +679,7 @@ label {
 }
 
 .monitor-name {
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   font-size: 1.05rem;
   letter-spacing: -0.01em;
   font-weight: 600;
@@ -555,7 +692,7 @@ label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: var(--font-mono);
+  font-family: var(--font-utility);
   font-size: 0.8rem;
   letter-spacing: 0;
   line-height: 1.4;
@@ -580,7 +717,7 @@ label {
 }
 
 .monitor-meta dt {
-  font-family: var(--font-mono);
+  font-family: var(--font-utility);
   font-size: 0.78rem;
   letter-spacing: 0.02em;
   line-height: 1.4;
@@ -588,7 +725,7 @@ label {
 }
 
 .monitor-meta dd {
-  font-family: var(--font-mono);
+  font-family: var(--font-utility);
   font-size: 0.83rem;
   font-weight: 500;
   letter-spacing: 0;
@@ -598,7 +735,7 @@ label {
 }
 
 .monitor-error {
-  font-family: var(--font-mono);
+  font-family: var(--font-utility);
   font-size: 0.8rem;
   line-height: 1.5;
   color: var(--danger);
@@ -617,7 +754,7 @@ label {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-utility);
   font-size: 0.7rem;
   font-weight: 500;
   letter-spacing: 0.03em;
@@ -654,7 +791,7 @@ label {
 .tag {
   display: inline-flex;
   align-items: center;
-  font-family: var(--font-mono);
+  font-family: var(--font-utility);
   font-size: 0.68rem;
   font-weight: 500;
   letter-spacing: 0.03em;
@@ -673,7 +810,7 @@ label {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   font-size: 0.85rem;
   font-weight: 500;
   letter-spacing: 0;
@@ -814,7 +951,7 @@ dialog[open]::backdrop {
 }
 
 .dialog-body h2 {
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -849,6 +986,12 @@ dialog[open]::backdrop {
   animation: shake 0.35s var(--ease);
 }
 
+.lookup-error {
+  max-width: 420px;
+  margin: 0.75rem auto 0;
+  text-align: center;
+}
+
 .empty-state {
   text-align: center;
   padding: 3.5rem 1.5rem;
@@ -866,7 +1009,7 @@ dialog[open]::backdrop {
 }
 
 .empty-title {
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: -0.01em;
