@@ -13,7 +13,7 @@ const valid = /^[a-z0-9_-]{3,10}$/.test(username);
 const monitors: Monitor[] = valid ? await listMonitorsForUser(username) : [];
 ---
 
-<Layout title={`${username || 'Dashboard'} — Uptime Monitor`}>
+<Layout title={`${username || 'Dashboard'} — aliv-e://`}>
 	<main class="container dashboard">
 		<div class="dashboard-top">
 			<header class="page-head">
