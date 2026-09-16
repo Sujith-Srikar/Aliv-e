@@ -6,7 +6,7 @@ interface Props {
 const { name = '' } = Astro.props;
 ---
 
-<dialog id="delete-dialog" aria-labelledby="delete-dialog-title">
+<dialog id="delete-dialog" aria-labelledby="delete-dialog-title" data-lenis-prevent>
 	<form id="delete-form" class="dialog-body delete-body" method="dialog">
 		<h2 id="delete-dialog-title">Delete monitor</h2>
 		<p class="muted delete-copy">
