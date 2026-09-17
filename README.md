@@ -285,6 +285,7 @@ The CRUD endpoints live under `/api/monitors`.
 
 Check intervals: `10, 14, 15, 20, 30, 45, 60` minutes.
 Timeouts: `1, 5, 10, 15, 20, 30, 45, 60` seconds.
+Timeout must be strictly less than the check interval.
 URLs must be `http` or `https` and must resolve to public IPs only.
 Usernames run 3–10 chars: lowercase letters, numbers, `_` or `-`.
 
