@@ -64,6 +64,20 @@ function isPostgrestError(e: unknown): e is { code?: string; message?: string } 
   return typeof e === 'object' && e !== null && ('code' in e || 'message' in e);
 }
 
+function checkViolationMessage(e: { message?: string }): string {
+  const match = /violates check constraint "([^"]+)"/.exec(e.message ?? '');
+  switch (match?.[1]) {
+    case 'monitors_interval_minutes_check':
+      return 'intervalMinutes must be one of 10, 14, 15, 20, 30, 45, 60';
+    case 'monitors_timeout_seconds_check':
+      return 'timeoutSeconds must be one of 1, 5, 10, 15, 20, 30, 45, 60';
+    case 'monitors_timeout_lt_interval_check':
+      return 'timeoutSeconds must be less than the check interval';
+    default:
+      return 'invalid monitor configuration';
+  }
+}
+
 export function handleError(e: unknown): Response {
   if (e instanceof HttpError) {
     return fail(e.code, e.message, e.status);
@@ -79,6 +93,18 @@ export function handleError(e: unknown): Response {
   }
   if (isPostgrestError(e) && e.code === '23505') {
     return fail('CONFLICT', 'a resource with these details already exists', 409);
+  }
+  if (isPostgrestError(e) && e.code === '23514') {
+    return fail('VALIDATION_ERROR', checkViolationMessage(e), 400);
+  }
+  // inserts that race past the app-level count check hit the DB trigger
+  // (monitors_check_user_cap), which raises P0001 — surface as 429, not 500.
+  if (
+    isPostgrestError(e) &&
+    e.code === 'P0001' &&
+    (e.message ?? '').includes('maximum number of monitors')
+  ) {
+    return fail('LIMIT_EXCEEDED', e.message as string, 429);
   }
   logger.error('api error', e);
   return fail('INTERNAL', 'internal server error', 500);
