@@ -64,9 +64,12 @@ function isPostgrestError(e: unknown): e is { code?: string; message?: string } 
   return typeof e === 'object' && e !== null && ('code' in e || 'message' in e);
 }
 
+function checkConstraintName(e: { message?: string }): string | null {
+  return /violates check constraint "([^"]+)"/.exec(e.message ?? '')?.[1] ?? null;
+}
+
 function checkViolationMessage(e: { message?: string }): string {
-  const match = /violates check constraint "([^"]+)"/.exec(e.message ?? '');
-  switch (match?.[1]) {
+  switch (checkConstraintName(e)) {
     case 'monitors_interval_minutes_check':
       return 'intervalMinutes must be one of 10, 14, 15, 20, 30, 45, 60';
     case 'monitors_timeout_seconds_check':
@@ -83,6 +86,9 @@ export function handleError(e: unknown): Response {
     return fail(e.code, e.message, e.status);
   }
   if (e instanceof ZodError) {
+    // User input problem, not a bug: warn (not error) but keep the issues —
+    // they carry path + received value/type, which is what you grep for.
+    logger.warn('validation error', e.issues);
     return fail('VALIDATION_ERROR', e.issues[0]?.message ?? 'invalid input', 400);
   }
   if (e instanceof SsrfError) {
@@ -95,7 +101,19 @@ export function handleError(e: unknown): Response {
     return fail('CONFLICT', 'a resource with these details already exists', 409);
   }
   if (isPostgrestError(e) && e.code === '23514') {
-    return fail('VALIDATION_ERROR', checkViolationMessage(e), 400);
+    // App validation passed but the database refused the row: either a
+    // single-field PATCH breaking a cross-field CHECK, or DB/app drift
+    // (migrations not applied). Always log at error level with the full
+    // constraint + failing row, and tag the client message with the
+    // constraint name so it can't be mistaken for the Zod message.
+    logger.error('database check violation', e);
+    const constraint = checkConstraintName(e);
+    const message = checkViolationMessage(e);
+    return fail(
+      'VALIDATION_ERROR',
+      constraint ? `${message} (database: ${constraint})` : message,
+      400,
+    );
   }
   // inserts that race past the app-level count check hit the DB trigger
   // (monitors_check_user_cap), which raises P0001 — surface as 429, not 500.
